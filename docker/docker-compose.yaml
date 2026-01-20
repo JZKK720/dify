@@ -695,6 +695,8 @@ services:
   api:
     image: langgenius/dify-api:1.11.2
     restart: always
+    ports:
+      - "${EXPOSE_API_PORT:-5051}:5001"
     environment:
       # Use the shared environment variables.
       <<: *shared-api-worker-env
@@ -806,6 +808,8 @@ services:
   web:
     image: langgenius/dify-web:1.11.2
     restart: always
+    ports:
+      - "${EXPOSE_WEB_PORT:-2082}:3000"
     environment:
       CONSOLE_API_URL: ${CONSOLE_API_URL:-}
       APP_API_URL: ${APP_API_URL:-}
@@ -1099,8 +1103,8 @@ services:
       - api
       - web
     ports:
-      - "${EXPOSE_NGINX_PORT:-80}:${NGINX_PORT:-80}"
-      - "${EXPOSE_NGINX_SSL_PORT:-443}:${NGINX_SSL_PORT:-443}"
+      - "${EXPOSE_NGINX_PORT:-2081}:${NGINX_PORT:-80}"
+      - "${EXPOSE_NGINX_SSL_PORT:-2443}:${NGINX_SSL_PORT:-443}"
 
   # The Weaviate vector store.
   weaviate:
