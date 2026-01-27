@@ -21,7 +21,7 @@ services:
 
   # API service
   api:
-    image: langgenius/dify-api:1.11.2
+    image: langgenius/dify-api:1.11.4
     restart: always
     ports:
       - "5051:5001"
@@ -65,7 +65,7 @@ services:
   # worker service
   # The Celery worker for processing all queues (dataset, workflow, mail, etc.)
   worker:
-    image: langgenius/dify-api:1.11.2
+    image: langgenius/dify-api:1.11.4
     restart: always
     environment:
       # Use the shared environment variables.
@@ -104,7 +104,7 @@ services:
   # worker_beat service
   # Celery beat for scheduling periodic tasks.
   worker_beat:
-    image: langgenius/dify-api:1.11.2
+    image: langgenius/dify-api:1.11.4
     restart: always
     environment:
       # Use the shared environment variables.
@@ -134,7 +134,7 @@ services:
 
   # Frontend web application.
   web:
-    image: langgenius/dify-web:1.11.2
+    image: langgenius/dify-web:1.11.4
     restart: always
     ports:
       - "${EXPOSE_WEB_PORT:-2881}:3000"
@@ -479,7 +479,8 @@ services:
       OB_CLUSTER_NAME: ${OCEANBASE_CLUSTER_NAME:-difyai}
       OB_SERVER_IP: 127.0.0.1
       MODE: mini
-      LANG: en_US.UTF-8
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
     ports:
       - "${OCEANBASE_VECTOR_PORT:-2881}:2881"
     healthcheck:

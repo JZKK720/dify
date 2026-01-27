@@ -81,7 +81,7 @@ class ExternalKnowledgeApiPayload(BaseModel):
 class ExternalDatasetCreatePayload(BaseModel):
     external_knowledge_api_id: str
     external_knowledge_id: str
-    name: str = Field(..., min_length=1, max_length=40)
+    name: str = Field(..., min_length=1, max_length=100)
     description: str | None = Field(None, max_length=400)
     external_retrieval_model: dict[str, object] | None = None
 
@@ -98,12 +98,19 @@ class BedrockRetrievalPayload(BaseModel):
     knowledge_id: str
 
 
+class ExternalApiTemplateListQuery(BaseModel):
+    page: int = Field(default=1, description="Page number")
+    limit: int = Field(default=20, description="Number of items per page")
+    keyword: str | None = Field(default=None, description="Search keyword")
+
+
 register_schema_models(
     console_ns,
     ExternalKnowledgeApiPayload,
     ExternalDatasetCreatePayload,
     ExternalHitTestingPayload,
     BedrockRetrievalPayload,
+    ExternalApiTemplateListQuery,
 )
 
 
@@ -124,19 +131,17 @@ class ExternalApiTemplateListApi(Resource):
     @account_initialization_required
     def get(self):
         _, current_tenant_id = current_account_with_tenant()
-        page = request.args.get("page", default=1, type=int)
-        limit = request.args.get("limit", default=20, type=int)
-        search = request.args.get("keyword", default=None, type=str)
+        query = ExternalApiTemplateListQuery.model_validate(request.args.to_dict())
 
         external_knowledge_apis, total = ExternalDatasetService.get_external_knowledge_apis(
-            page, limit, current_tenant_id, search
+            query.page, query.limit, current_tenant_id, query.keyword
         )
         response = {
             "data": [item.to_dict() for item in external_knowledge_apis],
-            "has_more": len(external_knowledge_apis) == limit,
-            "limit": limit,
+            "has_more": len(external_knowledge_apis) == query.limit,
+            "limit": query.limit,
             "total": total,
-            "page": page,
+            "page": query.page,
         }
         return response, 200
 

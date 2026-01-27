@@ -1,39 +1,29 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import * as React from 'react'
+import { createReactI18nextMock } from '@/test/i18n-mock'
 import InputWithCopy from './index'
 
-// Create a mock function that we can track using vi.hoisted
-const mockCopyToClipboard = vi.hoisted(() => vi.fn(() => true))
+// Mock navigator.clipboard for foxact/use-clipboard
+const mockWriteText = vi.fn(() => Promise.resolve())
 
-// Mock the copy-to-clipboard library
-vi.mock('copy-to-clipboard', () => ({
-  default: mockCopyToClipboard,
-}))
-
-// Mock the i18n hook
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
-      const translations: Record<string, string> = {
-        'common.operation.copy': 'Copy',
-        'common.operation.copied': 'Copied',
-        'appOverview.overview.appInfo.embedded.copy': 'Copy',
-        'appOverview.overview.appInfo.embedded.copied': 'Copied',
-      }
-      return translations[key] || key
-    },
-  }),
-}))
-
-// Mock es-toolkit/compat debounce
-vi.mock('es-toolkit/compat', () => ({
-  debounce: (fn: any) => fn,
+// Mock the i18n hook with custom translations for test assertions
+vi.mock('react-i18next', () => createReactI18nextMock({
+  'operation.copy': 'Copy',
+  'operation.copied': 'Copied',
+  'overview.appInfo.embedded.copy': 'Copy',
+  'overview.appInfo.embedded.copied': 'Copied',
 }))
 
 describe('InputWithCopy component', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockCopyToClipboard.mockClear()
+    mockWriteText.mockClear()
+    // Setup navigator.clipboard mock
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: mockWriteText,
+      },
+    })
   })
 
   it('renders correctly with default props', () => {
@@ -61,7 +51,9 @@ describe('InputWithCopy component', () => {
     const copyButton = screen.getByRole('button')
     fireEvent.click(copyButton)
 
-    expect(mockCopyToClipboard).toHaveBeenCalledWith('test value')
+    await waitFor(() => {
+      expect(mockWriteText).toHaveBeenCalledWith('test value')
+    })
   })
 
   it('copies custom value when copyValue prop is provided', async () => {
@@ -71,7 +63,9 @@ describe('InputWithCopy component', () => {
     const copyButton = screen.getByRole('button')
     fireEvent.click(copyButton)
 
-    expect(mockCopyToClipboard).toHaveBeenCalledWith('custom copy value')
+    await waitFor(() => {
+      expect(mockWriteText).toHaveBeenCalledWith('custom copy value')
+    })
   })
 
   it('calls onCopy callback when copy button is clicked', async () => {
@@ -82,7 +76,9 @@ describe('InputWithCopy component', () => {
     const copyButton = screen.getByRole('button')
     fireEvent.click(copyButton)
 
-    expect(onCopyMock).toHaveBeenCalledWith('test value')
+    await waitFor(() => {
+      expect(onCopyMock).toHaveBeenCalledWith('test value')
+    })
   })
 
   it('shows copied state after successful copy', async () => {
@@ -121,17 +117,19 @@ describe('InputWithCopy component', () => {
     expect(input).toHaveClass('custom-class')
   })
 
-  it('handles empty value correctly', () => {
+  it('handles empty value correctly', async () => {
     const mockOnChange = vi.fn()
     render(<InputWithCopy value="" onChange={mockOnChange} />)
-    const input = screen.getByRole('textbox')
+    const input = screen.getByDisplayValue('')
     const copyButton = screen.getByRole('button')
 
     expect(input).toBeInTheDocument()
     expect(copyButton).toBeInTheDocument()
 
     fireEvent.click(copyButton)
-    expect(mockCopyToClipboard).toHaveBeenCalledWith('')
+    await waitFor(() => {
+      expect(mockWriteText).toHaveBeenCalledWith('')
+    })
   })
 
   it('maintains focus on input after copy', async () => {
