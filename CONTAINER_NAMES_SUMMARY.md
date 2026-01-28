@@ -6,7 +6,7 @@ All containers in the Docker Compose setup have been configured with explicit co
 
 ### Core Services
 - **API Server**: `dify-docker-server` (port 5051:5001)
-- **Web Frontend**: `dify-web` (port 2881:3000)
+- **Web Frontend**: `dify-web` (port 2082:3000)
 - **Worker (Celery)**: `dify-worker`
 - **Worker Beat (Scheduler)**: `dify-worker-beat`
 

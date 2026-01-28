@@ -21,13 +21,12 @@ All ports have been standardized and clearly documented:
 | Service | Port | Type | Purpose |
 |---------|------|------|---------|
 | API Server | 5051 | HTTP/TCP | Backend API |
-| Web UI | 2881 | HTTP/TCP | Frontend Interface |
+| Web UI | 2082 | HTTP/TCP | Frontend Interface |
 | Nginx HTTP | 2081 | HTTP | Main Entry Point |
 | Nginx HTTPS | 2443 | HTTPS | Secure Main Entry Point |
 | Plugin Daemon | 5003 | HTTP/TCP | Plugin Management |
 
 #### **Optional Service Ports (Profile-Based)**
-- **OceanBase/SeekDB**: 2881
 - **Vastbase**: 5434
 - **Milvus**: 19530, 9091
 - **MyScale**: 8123
@@ -95,7 +94,7 @@ docker compose --profile milvus --profile elasticsearch up -d
 ### Access Dify
 - **Web UI**: http://localhost:2081
 - **API**: http://localhost:5051
-- **Frontend**: http://localhost:2881
+- **Frontend**: http://localhost:2082
 
 ### View Running Containers
 ```bash
@@ -135,11 +134,10 @@ docker logs dify-nginx
 
 ### **Development/Debugging**
 - 5051: Direct API access
-- 3881: Web UI direct access
+- 2082: Web UI direct access
 - 5003: Plugin Daemon debugging
 
 ### **Optional Vector Stores** (Profile-Based)
-- 2881: OceanBase/SeekDB
 - 5434: Vastbase
 - 19530: Milvus
 - 8123: MyScale
@@ -168,7 +166,7 @@ Every container has a clear, identifiable name:
 ### Configurable Ports
 Most external ports can be customized via `.env`:
 ```env
-EXPOSE_WEB_PORT=2881
+EXPOSE_WEB_PORT=2082
 EXPOSE_NGINX_PORT=2081
 EXPOSE_NGINX_SSL_PORT=2443
 EXPOSE_PLUGIN_DEBUGGING_PORT=5003
@@ -219,8 +217,8 @@ docker ps | grep dify-
 ### Port Already in Use?
 Edit `.env` and change:
 ```env
-EXPOSE_NGINX_PORT=2082    # Changed from 2081
-EXPOSE_WEB_PORT=3882      # Changed from 2881
+EXPOSE_NGINX_PORT=8081    # Changed from 2081
+EXPOSE_WEB_PORT=8082      # Changed from 2082
 ```
 
 ### Services Not Starting?
